@@ -131,12 +131,10 @@ namespace AspNetCore.Identity.LiteDB
                 throw new ArgumentNullException(nameof(user));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            _cancellationTokens.Insert(cancellationToken);
-
-            _users.Insert(user);
-            await SaveChanges(cancellationToken);
+            await Task.Run(() =>
+            {
+                _users.Insert(user);
+            }, cancellationToken);
 
             return IdentityResult.Success;
         }
