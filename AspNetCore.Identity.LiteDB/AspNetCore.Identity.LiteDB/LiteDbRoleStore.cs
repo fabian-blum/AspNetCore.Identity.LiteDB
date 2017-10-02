@@ -192,7 +192,6 @@ namespace AspNetCore.Identity.LiteDB
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(_roles.FindOne(u => u.Id == roleId));
         }
 

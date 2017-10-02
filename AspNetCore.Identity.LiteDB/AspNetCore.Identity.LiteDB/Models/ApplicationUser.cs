@@ -50,6 +50,8 @@ namespace AspNetCore.Identity.LiteDB.Models
 
         public bool UsesTwoFactorAuthentication { get; internal set; }
 
+        public string AuthenticationKey { get; set; }
+
         public virtual void AddRole(string role)
         {
             Roles.Add(role);

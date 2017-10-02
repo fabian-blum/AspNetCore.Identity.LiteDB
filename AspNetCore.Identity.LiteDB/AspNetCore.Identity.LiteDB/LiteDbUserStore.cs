@@ -19,8 +19,8 @@ namespace AspNetCore.Identity.LiteDB
         IUserTwoFactorStore<TUser>,
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>,
-        IUserPhoneNumberStore<TUser>
-        where TUser : ApplicationUser, new()
+        IUserPhoneNumberStore<TUser>,
+        IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
     {
         private readonly LiteCollection<TUser> _users;
         private readonly LiteCollection<CancellationToken> _cancellationTokens;
@@ -487,6 +487,29 @@ namespace AspNetCore.Identity.LiteDB
 
             return Task.FromResult(user.UsesTwoFactorAuthentication);
         }
+
+        public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.AuthenticationKey = key;
+
+            return Task.FromResult(_users.Update(user.Id, user));
+        }
+
+        public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            return Task.FromResult(_users.FindOne(u => u.Id == user.Id).AuthenticationKey);
+        }
         #endregion
 
         #region IUserEmailStore
@@ -810,6 +833,5 @@ namespace AspNetCore.Identity.LiteDB
             _disposed = true;
         }
         #endregion
-
     }
 }
