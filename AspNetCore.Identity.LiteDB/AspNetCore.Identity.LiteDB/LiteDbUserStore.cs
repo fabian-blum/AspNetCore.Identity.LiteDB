@@ -17,6 +17,7 @@ namespace AspNetCore.Identity.LiteDB
         IUserClaimStore<TUser>,
         IUserSecurityStampStore<TUser>,
         IUserTwoFactorStore<TUser>,
+        IUserAuthenticationTokenStore<TUser>,
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>,
         IUserPhoneNumberStore<TUser>,
@@ -460,7 +461,7 @@ namespace AspNetCore.Identity.LiteDB
         }
         #endregion
 
-        #region IUserTwoFactorStore
+        #region TokenTwoFactor
         public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -510,6 +511,36 @@ namespace AspNetCore.Identity.LiteDB
 
             return Task.FromResult(_users.FindOne(u => u.Id == user.Id).AuthenticationKey);
         }
+
+        public Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+        {
+            return Task.Run(() =>
+            {
+                var authToken = user.AuthTokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
+                if (authToken == null)
+                    user.AddToken(new AuthToken
+                    {
+                        Token = value,
+                        Name = name,
+                        LoginProvider = loginProvider
+                    });
+                else
+                    authToken.Token = value;
+            }, cancellationToken);
+        }
+
+        public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => user.RemoveToken(loginProvider, name), cancellationToken);
+        }
+
+        public Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        {
+            var authToken = user.AuthTokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
+
+            return Task.FromResult(authToken?.Token);
+        }
+
         #endregion
 
         #region IUserEmailStore
@@ -833,5 +864,7 @@ namespace AspNetCore.Identity.LiteDB
             _disposed = true;
         }
         #endregion
+
+
     }
 }

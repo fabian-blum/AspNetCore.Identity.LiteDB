@@ -48,6 +48,8 @@ namespace AspNetCore.Identity.LiteDB.Models
 
         public List<string> Roles { get; set; }
 
+        public List<AuthToken> AuthTokens { get; set; }
+
         public bool UsesTwoFactorAuthentication { get; internal set; }
 
         public string AuthenticationKey { get; set; }
@@ -112,6 +114,26 @@ namespace AspNetCore.Identity.LiteDB.Models
                 .Where(c => c.Value == claim.Value);
 
             Claims = Claims.Except(claimsToRemove).ToList();
+        }
+
+        public void AddToken(AuthToken token)
+        {
+            var existingToken = AuthTokens.SingleOrDefault(t => t.LoginProvider == token.LoginProvider && t.Name == token.Name);
+            if (existingToken == null)
+            {
+                AuthTokens.Add(token);
+            }
+            else
+            {
+                existingToken.Token = token.Token;
+            }
+        }
+
+        public void RemoveToken(string loginProvider, string name)
+        {
+            AuthTokens = AuthTokens
+                .Except(AuthTokens.Where(t => t.LoginProvider == loginProvider && t.Name == name))
+                .ToList();
         }
     }
 }
