@@ -18,11 +18,17 @@ namespace AspNetCore.Identity.LiteDB
         IUserSecurityStampStore<TUser>,
         IUserTwoFactorStore<TUser>,
         IUserAuthenticationTokenStore<TUser>,
+        IUserTwoFactorRecoveryCodeStore<TUser>,
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>,
         IUserPhoneNumberStore<TUser>,
         IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
     {
+
+        private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
+        private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
+        private const string RecoveryCodeTokenName = "RecoveryCodes";
+
         private readonly LiteCollection<TUser> _users;
         private readonly LiteCollection<CancellationToken> _cancellationTokens;
 
@@ -541,6 +547,35 @@ namespace AspNetCore.Identity.LiteDB
             return Task.FromResult(authToken?.Token);
         }
 
+        public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+        {
+            var mergedCodes = string.Join(";", recoveryCodes);
+            return SetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, mergedCodes, cancellationToken);
+        }
+
+        public async Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
+        {
+            var mergedCodes = await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
+            var splitCodes = mergedCodes.Split(';');
+            if (splitCodes.Contains(code))
+            {
+                var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
+                await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+        {
+            var mergedCodes = await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
+            if (mergedCodes.Length > 0)
+            {
+                return mergedCodes.Split(';').Length;
+            }
+            return 0;
+        }
+
         #endregion
 
         #region IUserEmailStore
@@ -864,6 +899,7 @@ namespace AspNetCore.Identity.LiteDB
             _disposed = true;
         }
         #endregion
+
 
 
     }
