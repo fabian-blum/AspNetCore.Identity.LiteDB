@@ -17,6 +17,7 @@ namespace AspNetCore.Identity.LiteDB.Models
             Logins = new List<UserLoginInfo>();
             SerializableLogins = new List<SerializableUserLoginInfo>();
             Claims = new List<IdentityUserClaim>();
+            Tokens = new List<UserToken<string>>();
         }
 
         [BsonId]
@@ -48,7 +49,7 @@ namespace AspNetCore.Identity.LiteDB.Models
 
         public List<string> Roles { get; set; }
 
-        public List<AuthToken> AuthTokens { get; set; }
+        public List<UserToken<string>> Tokens { get; set; }
 
         public bool UsesTwoFactorAuthentication { get; internal set; }
 
@@ -116,23 +117,23 @@ namespace AspNetCore.Identity.LiteDB.Models
             Claims = Claims.Except(claimsToRemove).ToList();
         }
 
-        public void AddToken(AuthToken token)
+        public void AddToken(UserToken<string> token)
         {
-            var existingToken = AuthTokens.SingleOrDefault(t => t.LoginProvider == token.LoginProvider && t.Name == token.Name);
+            var existingToken = Tokens.SingleOrDefault(t => t.LoginProvider == token.LoginProvider && t.TokenName == token.TokenName);
             if (existingToken == null)
             {
-                AuthTokens.Add(token);
+                Tokens.Add(token);
             }
             else
             {
-                existingToken.Token = token.Token;
+                existingToken.TokenValue = token.TokenValue;
             }
         }
 
         public void RemoveToken(string loginProvider, string name)
         {
-            AuthTokens = AuthTokens
-                .Except(AuthTokens.Where(t => t.LoginProvider == loginProvider && t.Name == name))
+            Tokens = Tokens
+                .Except(Tokens.Where(t => t.LoginProvider == loginProvider && t.TokenName == name))
                 .ToList();
         }
     }

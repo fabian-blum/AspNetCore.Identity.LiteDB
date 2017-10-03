@@ -479,6 +479,7 @@ namespace AspNetCore.Identity.LiteDB
             }
 
             user.UsesTwoFactorAuthentication = enabled;
+            user.TwoFactorEnabled = enabled;
             return Task.CompletedTask;
         }
 
@@ -497,41 +498,33 @@ namespace AspNetCore.Identity.LiteDB
 
         public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            user.AuthenticationKey = key;
-
-            return Task.FromResult(_users.Update(user.Id, user));
+            return SetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
         }
 
         public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            return Task.FromResult(_users.FindOne(u => u.Id == user.Id).AuthenticationKey);
+            return GetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
         }
 
         public Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
         {
             return Task.Run(() =>
             {
-                var authToken = user.AuthTokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
+                var authToken = user.Tokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.TokenName == name);
                 if (authToken == null)
-                    user.AddToken(new AuthToken
+                {
+                    SetTwoFactorEnabledAsync(user, true, cancellationToken);
+                    user.AddToken(new UserToken<string>()
                     {
-                        Token = value,
-                        Name = name,
-                        LoginProvider = loginProvider
+                        TokenValue = value,
+                        TokenName = name,
+                        LoginProvider = loginProvider,
+                        UserId = user.Id
                     });
+                }
+
                 else
-                    authToken.Token = value;
+                    authToken.TokenValue = value;
             }, cancellationToken);
         }
 
@@ -542,9 +535,12 @@ namespace AspNetCore.Identity.LiteDB
 
         public Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            var authToken = user.AuthTokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.Name == name);
-
-            return Task.FromResult(authToken?.Token);
+            var tokenEntity =
+                user.Tokens.SingleOrDefault(
+                    l =>
+                        l.TokenName == name && l.LoginProvider == loginProvider &&
+                        l.UserId == user.Id);
+            return Task.FromResult(tokenEntity?.TokenValue);
         }
 
         public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
