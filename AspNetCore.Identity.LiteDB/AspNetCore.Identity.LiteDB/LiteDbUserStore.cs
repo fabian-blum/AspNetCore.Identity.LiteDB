@@ -32,7 +32,7 @@ namespace AspNetCore.Identity.LiteDB
         private readonly LiteCollection<TUser> _users;
         private readonly LiteCollection<CancellationToken> _cancellationTokens;
 
-        public LiteDbUserStore(LiteDbContext dbContext)
+        public LiteDbUserStore(ILiteDbContext dbContext)
         {
             _users = dbContext.LiteDatabase.GetCollection<TUser>("users");
             _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
