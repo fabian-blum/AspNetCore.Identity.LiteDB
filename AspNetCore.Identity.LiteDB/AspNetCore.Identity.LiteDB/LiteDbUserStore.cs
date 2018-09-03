@@ -468,22 +468,18 @@ namespace AspNetCore.Identity.LiteDB
          var mergedCodes =
             await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
          var splitCodes = mergedCodes.Split(';');
-         if (splitCodes.Contains(code))
-         {
-            var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
-            await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
-            return true;
-         }
+         if (!splitCodes.Contains(code)) return false;
+         var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
+         await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
+         return true;
 
-         return false;
       }
 
       public async Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
       {
          var mergedCodes =
             await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
-         if (mergedCodes.Length > 0) return mergedCodes.Split(';').Length;
-         return 0;
+         return mergedCodes.Length > 0 ? mergedCodes.Split(';').Length : 0;
       }
 
       #endregion
