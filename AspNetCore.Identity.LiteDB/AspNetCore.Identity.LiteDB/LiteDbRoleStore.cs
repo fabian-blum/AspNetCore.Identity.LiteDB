@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.Identity.LiteDB.Data;
 using LiteDB;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Win32.SafeHandles;
 
 namespace AspNetCore.Identity.LiteDB
 {
-   public class LiteDbRoleStore<TRole> : IRoleStore<TRole>, IQueryableRoleStore<TRole>
+   public class LiteDbRoleStore<TRole> : IQueryableRoleStore<TRole>
       where TRole : IdentityRole, new()
    {
       private readonly LiteCollection<CancellationToken> _cancellationTokens;
@@ -165,10 +167,30 @@ namespace AspNetCore.Identity.LiteDB
          if (_disposed) throw new ObjectDisposedException(GetType().Name);
       }
 
+      // Flag: Has Dispose already been called?
       private bool _disposed;
+      // Instantiate a SafeHandle instance.
+      private SafeHandle _handle = new SafeFileHandle(IntPtr.Zero, true);
 
+      // Public implementation of Dispose pattern callable by consumers.
       public void Dispose()
       {
+         Dispose(true);
+         GC.SuppressFinalize(this);
+      }
+      // Protected implementation of Dispose pattern.
+      protected virtual void Dispose(bool disposing)
+      {
+         if (_disposed)
+            return;
+
+         if (disposing)
+         {
+            _handle.Dispose();
+            // Free any other managed objects here.
+            //
+         }
+
          _disposed = true;
       }
 
