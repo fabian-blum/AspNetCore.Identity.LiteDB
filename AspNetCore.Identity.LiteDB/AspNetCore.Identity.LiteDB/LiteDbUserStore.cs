@@ -13,8 +13,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace AspNetCore.Identity.LiteDB
 {
-   public class LiteDbUserStore<TUser> : IUserStore<TUser>,
-      IUserLoginStore<TUser>,
+   public class LiteDbUserStore<TUser> : IUserLoginStore<TUser>,
       IUserPasswordStore<TUser>,
       IUserClaimStore<TUser>,
       IUserSecurityStampStore<TUser>,
