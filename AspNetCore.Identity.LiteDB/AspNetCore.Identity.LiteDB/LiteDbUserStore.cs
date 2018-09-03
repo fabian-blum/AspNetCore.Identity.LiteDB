@@ -15,7 +15,9 @@ using Microsoft.Win32.SafeHandles;
 namespace AspNetCore.Identity.LiteDB
 {
    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-   public class LiteDbUserStore<TUser> : IUserLoginStore<TUser>,
+   [SuppressMessage("ReSharper", "RedundantExtendsListEntry")]
+   public class LiteDbUserStore<TUser> : IUserStore<TUser>,
+      IUserLoginStore<TUser>,
       IUserPasswordStore<TUser>,
       IUserClaimStore<TUser>,
       IUserSecurityStampStore<TUser>,
