@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AspNetCore.Identity.LiteDB.Data
 {
-   public class LiteDbContext
+   public class LiteDbContext : ILiteDbContext
    {
       public LiteDbContext(IConfiguration configuration)
       {

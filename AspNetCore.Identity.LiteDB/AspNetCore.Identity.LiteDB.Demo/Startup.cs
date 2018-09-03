@@ -22,7 +22,7 @@ namespace AspNetCore.Identity.LiteDB.Demo
         public void ConfigureServices(IServiceCollection services)
         {
             // Add LiteDB Dependency
-            services.AddSingleton<LiteDbContext>();
+            services.AddSingleton<ILiteDbContext,LiteDbContext>();
 
             services.AddIdentity<ApplicationUser, AspNetCore.Identity.LiteDB.IdentityRole>(options =>
                 {

@@ -18,7 +18,7 @@ namespace AspNetCore.Identity.LiteDB
       private readonly LiteCollection<CancellationToken> _cancellationTokens;
       private readonly LiteCollection<TRole> _roles;
 
-      public LiteDbRoleStore(LiteDbContext dbContext)
+      public LiteDbRoleStore(ILiteDbContext dbContext)
       {
          _roles = dbContext.LiteDatabase.GetCollection<TRole>("roles");
          _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
