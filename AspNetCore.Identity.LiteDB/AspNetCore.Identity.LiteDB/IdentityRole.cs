@@ -9,8 +9,8 @@ namespace AspNetCore.Identity.LiteDB
 
       public IdentityRole(string roleName) : this() => Name = roleName;
 
-      [BsonId] public string Id { get; set; }
+      [BsonId] public new string Id { get; set; }
 
-      public string Name { get; set; }
+      public new string Name { get; set; }
    }
 }

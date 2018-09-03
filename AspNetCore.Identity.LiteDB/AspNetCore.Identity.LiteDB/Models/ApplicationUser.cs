@@ -20,13 +20,13 @@ namespace AspNetCore.Identity.LiteDB.Models
          Tokens = new List<UserToken<string>>();
       }
 
-      [BsonId] public string Id { get; set; }
+      [BsonId] public new string Id { get; set; }
 
       public override string UserName { get; set; }
 
-      public virtual string SecurityStamp { get; set; }
+      public new virtual string SecurityStamp { get; set; }
 
-      public EmailInfo Email { get; set; }
+      public new EmailInfo Email { get; set; }
 
       public LockoutInfo Lockout { get; internal set; }
 
@@ -34,17 +34,17 @@ namespace AspNetCore.Identity.LiteDB.Models
 
       //public virtual bool EmailConfirmed { get; set; }
 
-      public virtual string PhoneNumber { get; set; }
+      public new virtual string PhoneNumber { get; set; }
 
-      public virtual bool PhoneNumberConfirmed { get; set; }
+      public new virtual bool PhoneNumberConfirmed { get; set; }
 
-      public virtual bool TwoFactorEnabled { get; set; }
+      public new virtual bool TwoFactorEnabled { get; set; }
 
       public virtual DateTime? LockoutEndDateUtc { get; set; }
 
-      public virtual bool LockoutEnabled { get; set; }
+      public new virtual bool LockoutEnabled { get; set; }
 
-      public virtual int AccessFailedCount { get; set; }
+      public new virtual int AccessFailedCount { get; set; }
 
       public List<string> Roles { get; set; }
 
@@ -54,7 +54,7 @@ namespace AspNetCore.Identity.LiteDB.Models
 
       public string AuthenticationKey { get; set; }
 
-      public virtual string PasswordHash { get; set; }
+      public new virtual string PasswordHash { get; set; }
 
       public List<SerializableUserLoginInfo> SerializableLogins { get; set; }
 
