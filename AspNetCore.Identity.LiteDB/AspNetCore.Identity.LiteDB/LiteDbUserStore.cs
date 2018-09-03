@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using AspNetCore.Identity.LiteDB.Data;
 using AspNetCore.Identity.LiteDB.Models;
 using LiteDB;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Win32.SafeHandles;
 
 namespace AspNetCore.Identity.LiteDB
 {
@@ -747,9 +749,23 @@ namespace AspNetCore.Identity.LiteDB
       }
 
       private bool _disposed;
+      private readonly SafeHandle _handle = new SafeFileHandle(IntPtr.Zero, true);
 
       public void Dispose()
       {
+         Dispose(true);
+         GC.SuppressFinalize(this);
+      }
+      protected virtual void Dispose(bool disposing)
+      {
+         if (_disposed)
+            return;
+
+         if (disposing)
+         {
+            _handle.Dispose();
+         }
+
          _disposed = true;
       }
 
