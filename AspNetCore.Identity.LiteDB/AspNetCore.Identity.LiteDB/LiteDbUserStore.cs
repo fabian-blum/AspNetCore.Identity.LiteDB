@@ -1,902 +1,758 @@
-﻿using AspNetCore.Identity.LiteDB.Data;
-using AspNetCore.Identity.LiteDB.Models;
-using LiteDB;
-using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using AspNetCore.Identity.LiteDB.Data;
+using AspNetCore.Identity.LiteDB.Models;
+using LiteDB;
+using Microsoft.AspNetCore.Identity;
 
 namespace AspNetCore.Identity.LiteDB
 {
-    public class LiteDbUserStore<TUser> : IUserStore<TUser>,
-        IUserLoginStore<TUser>,
-        IUserPasswordStore<TUser>,
-        IUserClaimStore<TUser>,
-        IUserSecurityStampStore<TUser>,
-        IUserTwoFactorStore<TUser>,
-        IUserAuthenticationTokenStore<TUser>,
-        IUserTwoFactorRecoveryCodeStore<TUser>,
-        IUserEmailStore<TUser>,
-        IUserLockoutStore<TUser>,
-        IUserPhoneNumberStore<TUser>,
-        IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
-    {
-
-        private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
-        private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
-        private const string RecoveryCodeTokenName = "RecoveryCodes";
-
-        private readonly LiteCollection<TUser> _users;
-        private readonly LiteCollection<CancellationToken> _cancellationTokens;
-
-        public LiteDbUserStore(LiteDbContext dbContext)
-        {
-            _users = dbContext.LiteDatabase.GetCollection<TUser>("users");
-            _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
-        }
-
-        public Task SaveChanges(
-            CancellationToken cancellationToken = default(CancellationToken)
-        )
-        {
-            _cancellationTokens.Insert(cancellationToken);
-            return Task.FromResult(cancellationToken);
-        }
-
-        #region IUserStore
-        public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+   public class LiteDbUserStore<TUser> : IUserStore<TUser>,
+      IUserLoginStore<TUser>,
+      IUserPasswordStore<TUser>,
+      IUserClaimStore<TUser>,
+      IUserSecurityStampStore<TUser>,
+      IUserTwoFactorStore<TUser>,
+      IUserAuthenticationTokenStore<TUser>,
+      IUserTwoFactorRecoveryCodeStore<TUser>,
+      IUserEmailStore<TUser>,
+      IUserLockoutStore<TUser>,
+      IUserPhoneNumberStore<TUser>,
+      IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
+   {
+      private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
+      private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
+      private const string RecoveryCodeTokenName = "RecoveryCodes";
+      private readonly LiteCollection<CancellationToken> _cancellationTokens;
+
+      private readonly LiteCollection<TUser> _users;
+
+      public LiteDbUserStore(LiteDbContext dbContext)
+      {
+         _users = dbContext.LiteDatabase.GetCollection<TUser>("users");
+         _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
+      }
 
-            return Task.FromResult(user.Id);
-        }
+      public Task SaveChanges(
+         CancellationToken cancellationToken = default(CancellationToken)
+      )
+      {
+         _cancellationTokens.Insert(cancellationToken);
+         return Task.FromResult(cancellationToken);
+      }
+
+      #region IUserStore
 
-        public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.Id);
+      }
 
-            return Task.FromResult(user.UserName);
-        }
+      public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.UserName);
+      }
+
+      public Task SetUserNameAsync(TUser user, string userName,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (userName == null)
-            {
-                throw new ArgumentNullException(nameof(userName));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            user.UserName = userName;
+         if (userName == null) throw new ArgumentNullException(nameof(userName));
 
-            return Task.CompletedTask;
-        }
+         user.UserName = userName;
 
-        public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.CompletedTask;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task<string> GetNormalizedUserNameAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.FromResult(user.NormalizedUserName);
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.FromResult(user.NormalizedUserName);
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task SetNormalizedUserNameAsync(TUser user, string normalizedName,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (normalizedName == null)
-            {
-                throw new ArgumentNullException(nameof(normalizedName));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            user.NormalizedUserName = normalizedName;
+         if (normalizedName == null) throw new ArgumentNullException(nameof(normalizedName));
 
-            return Task.CompletedTask;
-        }
+         user.NormalizedUserName = normalizedName;
 
-        public async Task<IdentityResult> CreateAsync(
-            TUser user,
-            CancellationToken cancellationToken = default(CancellationToken)
-        )
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.CompletedTask;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public async Task<IdentityResult> CreateAsync(
+         TUser user,
+         CancellationToken cancellationToken = default(CancellationToken)
+      )
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            await Task.Run(() =>
-            {
-                _users.Insert(user);
-            }, cancellationToken);
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return IdentityResult.Success;
-        }
+         await Task.Run(() => { _users.Insert(user); }, cancellationToken);
 
-        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return IdentityResult.Success;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public async Task<IdentityResult> UpdateAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            await Task.Run(() =>
-            {
-                _users.Update(user.Id, user);
-            }, cancellationToken);
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
+         await Task.Run(() => { _users.Update(user.Id, user); }, cancellationToken);
 
-            return IdentityResult.Success;
-        }
 
-        public async Task<IdentityResult> DeleteAsync(
-            TUser user,
-            CancellationToken cancellationToken = default(CancellationToken)
-        )
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return IdentityResult.Success;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public async Task<IdentityResult> DeleteAsync(
+         TUser user,
+         CancellationToken cancellationToken = default(CancellationToken)
+      )
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            await Task.Run(() =>
-            {
-                _users.Delete(user.Id);
-            }, cancellationToken);
-
-            return IdentityResult.Success;
-        }
-
-        public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(_users.FindOne(u => u.Id == userId));
-        }
-
-        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            var query = _users.Find(u => u.NormalizedUserName == normalizedUserName).FirstOrDefault();
-
-            return Task.FromResult(query);
-        }
-        #endregion
-
-        #region IUserLoginStore
-        public Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (login == null)
-            {
-                throw new ArgumentNullException(nameof(login));
-            }
+         await Task.Run(() => { _users.Delete(user.Id); }, cancellationToken);
 
-            user.AddLogin(login);
+         return IdentityResult.Success;
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         cancellationToken.ThrowIfCancellationRequested();
+         return Task.FromResult(_users.FindOne(u => u.Id == userId));
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task<TUser> FindByNameAsync(string normalizedUserName,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (loginProvider == null)
-            {
-                throw new ArgumentNullException(nameof(loginProvider));
-            }
+         var query = _users.Find(u => u.NormalizedUserName == normalizedUserName).FirstOrDefault();
 
-            if (providerKey == null)
-            {
-                throw new ArgumentNullException(nameof(providerKey));
-            }
+         return Task.FromResult(query);
+      }
 
-            user.RemoveLogin(new UserLoginInfo(loginProvider, providerKey, loginProvider));
+      #endregion
 
-            return Task.CompletedTask;
-        }
+      #region IUserLoginStore
 
-        public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task AddLoginAsync(TUser user, UserLoginInfo login,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult<IList<UserLoginInfo>>(user.Logins.ToList());
-        }
+         if (login == null) throw new ArgumentNullException(nameof(login));
 
-        public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         user.AddLogin(login);
 
-            if (loginProvider == null)
-            {
-                throw new ArgumentNullException(nameof(loginProvider));
-            }
+         return Task.CompletedTask;
+      }
 
-            if (providerKey == null)
-            {
-                throw new ArgumentNullException(nameof(providerKey));
-            }
+      public Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            var query = _users.Find(l => l.Logins.Any(s => s.LoginProvider == loginProvider & s.ProviderKey == providerKey));
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult(query.FirstOrDefault());
-        }
-        #endregion
+         if (loginProvider == null) throw new ArgumentNullException(nameof(loginProvider));
 
-        #region IUserPasswordStore
-        public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (providerKey == null) throw new ArgumentNullException(nameof(providerKey));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         user.RemoveLogin(new UserLoginInfo(loginProvider, providerKey, loginProvider));
 
-            user.PasswordHash = passwordHash;
+         return Task.CompletedTask;
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult<IList<UserLoginInfo>>(user.Logins.ToList());
+      }
 
-            return Task.FromResult(user.PasswordHash);
-        }
+      public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (loginProvider == null) throw new ArgumentNullException(nameof(loginProvider));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (providerKey == null) throw new ArgumentNullException(nameof(providerKey));
 
-            return Task.FromResult(user.PasswordHash != null);
-        }
-        #endregion
+         var query = _users.Find(l =>
+            l.Logins.Any(s => (s.LoginProvider == loginProvider) & (s.ProviderKey == providerKey)));
 
-        #region IUserClaimStore
-        public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.FromResult(query.FirstOrDefault());
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      #endregion
 
-            return Task.FromResult<IList<Claim>>(user.Claims.Select(c => new Claim(c.Type, c.Value)).ToList());
-        }
+      #region IUserPasswordStore
 
-        public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task SetPasswordHashAsync(TUser user, string passwordHash,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (claims == null)
-            {
-                throw new ArgumentNullException(nameof(claims));
-            }
+         user.PasswordHash = passwordHash;
 
-            foreach (var claim in claims)
-            {
-                user.AddClaim(claim);
-            }
+         return Task.CompletedTask;
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task<string> GetPasswordHashAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.PasswordHash);
+      }
 
-            if (claim == null)
-            {
-                throw new ArgumentNullException(nameof(claim));
-            }
+      public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (newClaim == null)
-            {
-                throw new ArgumentNullException(nameof(newClaim));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            user.RemoveClaim(claim);
-            user.AddClaim(newClaim);
+         return Task.FromResult(user.PasswordHash != null);
+      }
 
-            return Task.CompletedTask;
-        }
+      #endregion
 
-        public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      #region IUserClaimStore
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task<IList<Claim>> GetClaimsAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (claims == null)
-            {
-                throw new ArgumentNullException(nameof(claims));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            foreach (var claim in claims)
-            {
-                user.RemoveClaim(claim);
-            }
+         return Task.FromResult<IList<Claim>>(user.Claims.Select(c => new Claim(c.Type, c.Value)).ToList());
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (claim == null)
-            {
-                throw new ArgumentNullException(nameof(claim));
-            }
+         if (claims == null) throw new ArgumentNullException(nameof(claims));
 
-            var query = _users.Find(l => l.Claims.Any(c => c.Type == claim.Type && c.Value == claim.Value));
+         foreach (var claim in claims) user.AddClaim(claim);
 
+         return Task.CompletedTask;
+      }
 
+      public Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.FromResult(query.ToList() as IList<TUser>);
-        }
-        #endregion
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        #region IUserSecurityStampStore
-        public Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (claim == null) throw new ArgumentNullException(nameof(claim));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (newClaim == null) throw new ArgumentNullException(nameof(newClaim));
 
-            if (stamp == null)
-            {
-                throw new ArgumentNullException(nameof(stamp));
-            }
+         user.RemoveClaim(claim);
+         user.AddClaim(newClaim);
 
-            user.SecurityStamp = stamp;
-            return Task.CompletedTask;
-        }
+         return Task.CompletedTask;
+      }
 
-        public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult(user.SecurityStamp);
-        }
-        #endregion
+         if (claims == null) throw new ArgumentNullException(nameof(claims));
 
-        #region TokenTwoFactor
-        public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         foreach (var claim in claims) user.RemoveClaim(claim);
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.CompletedTask;
+      }
 
-            user.UsesTwoFactorAuthentication = enabled;
-            user.TwoFactorEnabled = enabled;
-            return Task.CompletedTask;
-        }
+      public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (claim == null) throw new ArgumentNullException(nameof(claim));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         var query = _users.Find(l => l.Claims.Any(c => c.Type == claim.Type && c.Value == claim.Value));
 
-            return Task.FromResult(user.UsesTwoFactorAuthentication);
-        }
-
-        public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
-        {
-            return SetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
-        }
-
-        public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
-        {
-            return GetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
-        }
-
-        public Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
-        {
-            return Task.Run(() =>
-            {
-                var authToken = user.Tokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.TokenName == name);
-                if (authToken == null)
-                {
-                    SetTwoFactorEnabledAsync(user, true, cancellationToken);
-                    user.AddToken(new UserToken<string>()
-                    {
-                        TokenValue = value,
-                        TokenName = name,
-                        LoginProvider = loginProvider,
-                        UserId = user.Id
-                    });
-                }
-
-                else
-                    authToken.TokenValue = value;
-            }, cancellationToken);
-        }
-
-        public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        {
-            return Task.Run(() => user.RemoveToken(loginProvider, name), cancellationToken);
-        }
-
-        public Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-        {
-            var tokenEntity =
-                user.Tokens.SingleOrDefault(
-                    l =>
-                        l.TokenName == name && l.LoginProvider == loginProvider &&
-                        l.UserId == user.Id);
-            return Task.FromResult(tokenEntity?.TokenValue);
-        }
-
-        public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
-        {
-            var mergedCodes = string.Join(";", recoveryCodes);
-            return SetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, mergedCodes, cancellationToken);
-        }
-
-        public async Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
-        {
-            var mergedCodes = await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
-            var splitCodes = mergedCodes.Split(';');
-            if (splitCodes.Contains(code))
-            {
-                var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
-                await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
-                return true;
-            }
-            return false;
-        }
-
-        public async Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
-        {
-            var mergedCodes = await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
-            if (mergedCodes.Length > 0)
-            {
-                return mergedCodes.Split(';').Length;
-            }
-            return 0;
-        }
 
-        #endregion
+         return Task.FromResult(query.ToList() as IList<TUser>);
+      }
 
-        #region IUserEmailStore
-        public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      #endregion
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      #region IUserSecurityStampStore
 
-            if (email == null)
-            {
-                throw new ArgumentNullException(nameof(email));
-            }
+      public Task SetSecurityStampAsync(TUser user, string stamp,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            user.Email = email;
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.CompletedTask;
-        }
+         if (stamp == null) throw new ArgumentNullException(nameof(stamp));
 
-        public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         user.SecurityStamp = stamp;
+         return Task.CompletedTask;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task<string> GetSecurityStampAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user.Email == null)
-            {
-                throw new InvalidOperationException("Cannot get the confirmation status of the e-mail since the user doesn't have an e-mail.");
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult(user.Email?.Address);
-        }
+         return Task.FromResult(user.SecurityStamp);
+      }
 
-        public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      #endregion
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      #region TokenTwoFactor
 
-            if (user.Email == null)
-            {
-                throw new InvalidOperationException("Cannot get the confirmation status of the e-mail since the user doesn't have an e-mail.");
-            }
+      public Task SetTwoFactorEnabledAsync(TUser user, bool enabled,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult(user.Email.IsConfirmed);
-        }
+         user.UsesTwoFactorAuthentication = enabled;
+         user.TwoFactorEnabled = enabled;
+         return Task.CompletedTask;
+      }
 
-        public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task<bool> GetTwoFactorEnabledAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         return Task.FromResult(user.UsesTwoFactorAuthentication);
+      }
+
+      public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken) =>
+         SetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
+
+      public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken) =>
+         GetTokenAsync(user, AuthenticatorStoreLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
+
+      public Task SetTokenAsync(TUser user, string loginProvider, string name, string value,
+         CancellationToken cancellationToken)
+      {
+         return Task.Run(() =>
+         {
+            var authToken = user.Tokens.SingleOrDefault(t => t.LoginProvider == loginProvider && t.TokenName == name);
+            if (authToken == null)
             {
-                throw new ArgumentNullException(nameof(user));
+               SetTwoFactorEnabledAsync(user, true, cancellationToken);
+               user.AddToken(new UserToken<string>
+               {
+                  TokenValue = value,
+                  TokenName = name,
+                  LoginProvider = loginProvider,
+                  UserId = user.Id
+               });
             }
 
-            if (user.Email == null)
+            else
             {
-                throw new InvalidOperationException("Cannot set the confirmation status of the e-mail since the user doesn't have an e-mail.");
+               authToken.TokenValue = value;
             }
+         }, cancellationToken);
+      }
 
-            user.Email.ConfirmationTime = confirmed
-                ? (DateTime?)DateTime.UtcNow
-                : null;
+      public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+      {
+         return Task.Run(() => user.RemoveToken(loginProvider, name), cancellationToken);
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task<string> GetTokenAsync(TUser user, string loginProvider, string name,
+         CancellationToken cancellationToken)
+      {
+         var tokenEntity =
+            user.Tokens.SingleOrDefault(
+               l =>
+                  l.TokenName == name && l.LoginProvider == loginProvider &&
+                  l.UserId == user.Id);
+         return Task.FromResult(tokenEntity?.TokenValue);
+      }
 
-        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+      {
+         var mergedCodes = string.Join(";", recoveryCodes);
+         return SetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, mergedCodes,
+            cancellationToken);
+      }
 
-            return Task.FromResult(_users.FindOne(u => u.Email.NormalizedAddress == normalizedEmail));
+      public async Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
+      {
+         var mergedCodes =
+            await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
+         var splitCodes = mergedCodes.Split(';');
+         if (splitCodes.Contains(code))
+         {
+            var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
+            await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
+            return true;
+         }
 
-        }
-        public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return false;
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public async Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+      {
+         var mergedCodes =
+            await GetTokenAsync(user, AuthenticatorStoreLoginProvider, RecoveryCodeTokenName, cancellationToken) ?? "";
+         if (mergedCodes.Length > 0) return mergedCodes.Split(';').Length;
+         return 0;
+      }
 
-            return Task.FromResult(user.Email?.NormalizedAddress);
-        }
+      #endregion
 
-        public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      #region IUserEmailStore
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task SetEmailAsync(TUser user, string email,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user.Email != null && normalizedEmail != null)
-            {
-                user.Email.NormalizedAddress = normalizedEmail;
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.CompletedTask;
-        }
-        #endregion
+         if (email == null) throw new ArgumentNullException(nameof(email));
 
-        #region IUserLockoutStore
-        public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         user.Email = email;
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.CompletedTask;
+      }
 
-            return Task.FromResult(user.Lockout?.EndDate);
+      public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user.Email == null)
+            throw new InvalidOperationException(
+               "Cannot get the confirmation status of the e-mail since the user doesn't have an e-mail.");
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.Email?.Address);
+      }
 
-            if (user.Lockout == null)
-            {
-                user.Lockout = new LockoutInfo();
-            }
+      public Task<bool> GetEmailConfirmedAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            user.Lockout.EndDate = lockoutEnd;
-            return Task.CompletedTask;
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user.Email == null)
+            throw new InvalidOperationException(
+               "Cannot get the confirmation status of the e-mail since the user doesn't have an e-mail.");
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.Email.IsConfirmed);
+      }
 
-            if (user.Lockout == null)
-            {
-                user.Lockout = new LockoutInfo();
-            }
+      public Task SetEmailConfirmedAsync(TUser user, bool confirmed,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            var newAccessFailedCount = ++user.Lockout.AccessFailedCount;
-            return Task.FromResult(newAccessFailedCount);
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user.Email == null)
+            throw new InvalidOperationException(
+               "Cannot set the confirmation status of the e-mail since the user doesn't have an e-mail.");
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         user.Email.ConfirmationTime = confirmed
+            ? (DateTime?) DateTime.UtcNow
+            : null;
 
-            if (user.Lockout != null)
-            {
-                user.Lockout.AccessFailedCount = 0;
-            }
+         return Task.CompletedTask;
+      }
 
-            return Task.CompletedTask;
-        }
+      public Task<TUser> FindByEmailAsync(string normalizedEmail,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.FromResult(_users.FindOne(u => u.Email.NormalizedAddress == normalizedEmail));
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task<string> GetNormalizedEmailAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.FromResult(user.Lockout?.AccessFailedCount ?? 0);
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.FromResult(user.Email?.NormalizedAddress);
+      }
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+      public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.FromResult(user.Lockout != null && user.Lockout.Enabled);
-        }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user.Email != null && normalizedEmail != null) user.Email.NormalizedAddress = normalizedEmail;
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.CompletedTask;
+      }
 
-            if (user.Lockout == null)
-            {
-                user.Lockout = new LockoutInfo();
-            }
+      #endregion
 
-            user.Lockout.Enabled = enabled;
+      #region IUserLockoutStore
 
-            return Task.CompletedTask;
-        }
-        #endregion
+      public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        #region IUserPhoneNumberStore
-        public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         return Task.FromResult(user.Lockout?.EndDate);
+      }
 
-            user.Phone = phoneNumber;
-            return Task.CompletedTask;
-        }
+      public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user.Lockout == null) user.Lockout = new LockoutInfo();
 
-            return Task.FromResult(user.Phone?.Number);
-        }
+         user.Lockout.EndDate = lockoutEnd;
+         return Task.CompletedTask;
+      }
 
-        public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task<int> IncrementAccessFailedCountAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user.Phone == null)
-            {
-                throw new InvalidOperationException("Cannot get the confirmation status of the phone number since the user doesn't have a phone number.");
-            }
+         if (user.Lockout == null) user.Lockout = new LockoutInfo();
 
-            return Task.FromResult(user.Phone.IsConfirmed);
-        }
+         var newAccessFailedCount = ++user.Lockout.AccessFailedCount;
+         return Task.FromResult(newAccessFailedCount);
+      }
 
-        public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task ResetAccessFailedCountAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+         if (user == null) throw new ArgumentNullException(nameof(user));
 
-            if (user.Phone == null)
-            {
-                throw new InvalidOperationException("Cannot set the confirmation status of the phone number since the user doesn't have a phone number.");
-            }
+         if (user.Lockout != null) user.Lockout.AccessFailedCount = 0;
 
-            user.Phone.ConfirmationTime = confirmed
-                ? (DateTime?)DateTime.UtcNow
-                : null;
-
-            return Task.CompletedTask;
-        }
-        #endregion
-
-        #region IDisposable
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-        }
+         return Task.CompletedTask;
+      }
+
+      public Task<int> GetAccessFailedCountAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         return Task.FromResult(user.Lockout?.AccessFailedCount ?? 0);
+      }
+
+      public Task<bool> GetLockoutEnabledAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         return Task.FromResult(user.Lockout != null && user.Lockout.Enabled);
+      }
+
+      public Task SetLockoutEnabledAsync(TUser user, bool enabled,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         if (user.Lockout == null) user.Lockout = new LockoutInfo();
+
+         user.Lockout.Enabled = enabled;
+
+         return Task.CompletedTask;
+      }
+
+      #endregion
+
+      #region IUserPhoneNumberStore
+
+      public Task SetPhoneNumberAsync(TUser user, string phoneNumber,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         user.Phone = phoneNumber;
+         return Task.CompletedTask;
+      }
+
+      public Task<string> GetPhoneNumberAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         return Task.FromResult(user.Phone?.Number);
+      }
+
+      public Task<bool> GetPhoneNumberConfirmedAsync(TUser user,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         if (user.Phone == null)
+            throw new InvalidOperationException(
+               "Cannot get the confirmation status of the phone number since the user doesn't have a phone number.");
+
+         return Task.FromResult(user.Phone.IsConfirmed);
+      }
+
+      public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed,
+         CancellationToken cancellationToken = default(CancellationToken))
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+
+         if (user == null) throw new ArgumentNullException(nameof(user));
+
+         if (user.Phone == null)
+            throw new InvalidOperationException(
+               "Cannot set the confirmation status of the phone number since the user doesn't have a phone number.");
+
+         user.Phone.ConfirmationTime = confirmed
+            ? (DateTime?) DateTime.UtcNow
+            : null;
+
+         return Task.CompletedTask;
+      }
+
+      #endregion
+
+      #region IDisposable
 
-        private bool _disposed;
-        public void Dispose()
-        {
-            _disposed = true;
-        }
-        #endregion
+      private void ThrowIfDisposed()
+      {
+         if (_disposed) throw new ObjectDisposedException(GetType().Name);
+      }
 
+      private bool _disposed;
 
+      public void Dispose()
+      {
+         _disposed = true;
+      }
 
-    }
+      #endregion
+   }
 }

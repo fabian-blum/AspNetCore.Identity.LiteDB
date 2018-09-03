@@ -1,226 +1,177 @@
-﻿using AspNetCore.Identity.LiteDB.Data;
-using LiteDB;
-using Microsoft.AspNetCore.Identity;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AspNetCore.Identity.LiteDB.Data;
+using LiteDB;
+using Microsoft.AspNetCore.Identity;
 
 namespace AspNetCore.Identity.LiteDB
 {
-    public class LiteDbRoleStore<TRole> : IRoleStore<TRole>, IQueryableRoleStore<TRole>
-        where TRole : IdentityRole, new()
-    {
-        private readonly LiteCollection<TRole> _roles;
-        private readonly LiteCollection<CancellationToken> _cancellationTokens;
+   public class LiteDbRoleStore<TRole> : IRoleStore<TRole>, IQueryableRoleStore<TRole>
+      where TRole : IdentityRole, new()
+   {
+      private readonly LiteCollection<CancellationToken> _cancellationTokens;
+      private readonly LiteCollection<TRole> _roles;
 
-        public LiteDbRoleStore(LiteDbContext dbContext)
-        {
-            _roles = dbContext.LiteDatabase.GetCollection<TRole>("roles");
-            _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
-        }
+      public LiteDbRoleStore(LiteDbContext dbContext)
+      {
+         _roles = dbContext.LiteDatabase.GetCollection<TRole>("roles");
+         _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
+      }
 
-        public Task SaveChanges(
-            CancellationToken cancellationToken = default(CancellationToken)
-        )
-        {
-            _cancellationTokens.Insert(cancellationToken);
-            return Task.FromResult(cancellationToken);
-        }
+      public virtual IQueryable<TRole> Roles => _roles.FindAll().AsQueryable();
 
-        public virtual Task CreateAsync(TRole role)
-        {
-            return Task.FromResult(_roles.Insert(role));
-        }
+      public async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public virtual Task UpdateAsync(TRole role)
-        {
-            return Task.FromResult(_roles.Update(role.Id, role));
-        }
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-        public virtual Task DeleteAsync(TRole role)
-        {
-            return Task.FromResult(_roles.Delete(role.Id));
-        }
+         await Task.Run(() => { _roles.Insert(role); }, cancellationToken);
 
-        public virtual Task<TRole> FindByIdAsync(string roleId)
-        {
-            return Task.FromResult(_roles.FindOne(r => r.Id == roleId));
-        }
+         return IdentityResult.Success;
+      }
 
-        public virtual Task<TRole> FindByNameAsync(string roleName)
-        {
-            return Task.FromResult(_roles.FindOne(r => r.Name == roleName));
-        }
+      public async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public virtual IQueryable<TRole> Roles => _roles.FindAll().AsQueryable();
-        public async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         await Task.Run(() => { _roles.Update(role.Id, role); }, cancellationToken);
 
-            await Task.Run(() =>
-            {
-                _roles.Insert(role);
-            }, cancellationToken);
+         return IdentityResult.Success;
+      }
 
-            return IdentityResult.Success;
-        }
+      public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         await Task.Run(() => { _roles.Delete(role.Id); }, cancellationToken);
 
-            await Task.Run(() =>
-            {
-                _roles.Update(role.Id, role);
-            }, cancellationToken);
+         return IdentityResult.Success;
+      }
 
-            return IdentityResult.Success;
-        }
+      public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-        public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         return Task.FromResult(role.Id);
+      }
 
-            await Task.Run(() =>
-            {
-                _roles.Delete(role.Id);
-            }, cancellationToken);
+      public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return IdentityResult.Success;
-        }
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-        public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         return Task.FromResult(role.Name);
+      }
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+      public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.FromResult(role.Id);
-        }
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (roleName == null) throw new ArgumentNullException(nameof(roleName));
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         role.Name = roleName;
 
-            return Task.FromResult(role.Name);
-        }
+         return Task.CompletedTask;
+      }
 
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-            if (roleName == null)
-            {
-                throw new ArgumentNullException(nameof(roleName));
-            }
+         return Task.FromResult(role.NormalizedName);
+      }
 
-            role.Name = roleName;
+      public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            return Task.CompletedTask;
-        }
+         if (role == null) throw new ArgumentNullException(nameof(role));
 
-        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+         if (normalizedName == null) throw new ArgumentNullException(nameof(normalizedName));
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         role.NormalizedName = normalizedName;
 
-            return Task.FromResult(role.NormalizedName);
-        }
+         return Task.CompletedTask;
+      }
 
-        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
+         return Task.FromResult(_roles.FindOne(u => u.Id == roleId));
+      }
 
-            if (normalizedName == null)
-            {
-                throw new ArgumentNullException(nameof(normalizedName));
-            }
+      public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
 
-            role.NormalizedName = normalizedName;
+         var query = _roles.Find(r => r.NormalizedName == normalizedRoleName).FirstOrDefault();
 
-            return Task.CompletedTask;
-        }
+         return Task.FromResult(query);
+      }
 
-        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public Task SaveChanges(
+         CancellationToken cancellationToken = default(CancellationToken)
+      )
+      {
+         _cancellationTokens.Insert(cancellationToken);
+         return Task.FromResult(cancellationToken);
+      }
 
-            return Task.FromResult(_roles.FindOne(u => u.Id == roleId));
-        }
+      public virtual Task CreateAsync(TRole role) => Task.FromResult(_roles.Insert(role));
 
-        public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+      public virtual Task UpdateAsync(TRole role) => Task.FromResult(_roles.Update(role.Id, role));
 
-            var query = _roles.Find(r => r.NormalizedName == normalizedRoleName).FirstOrDefault();
+      public virtual Task DeleteAsync(TRole role) => Task.FromResult(_roles.Delete(role.Id));
 
-            return Task.FromResult(query);
-        }
+      public virtual Task<TRole> FindByIdAsync(string roleId)
+      {
+         return Task.FromResult(_roles.FindOne(r => r.Id == roleId));
+      }
 
-        #region IDisposable
+      public virtual Task<TRole> FindByNameAsync(string roleName)
+      {
+         return Task.FromResult(_roles.FindOne(r => r.Name == roleName));
+      }
 
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-        }
+      #region IDisposable
 
-        private bool _disposed;
-        public void Dispose()
-        {
-            _disposed = true;
-        }
+      private void ThrowIfDisposed()
+      {
+         if (_disposed) throw new ObjectDisposedException(GetType().Name);
+      }
 
-        #endregion
-    }
+      private bool _disposed;
+
+      public void Dispose()
+      {
+         _disposed = true;
+      }
+
+      #endregion
+   }
 }
