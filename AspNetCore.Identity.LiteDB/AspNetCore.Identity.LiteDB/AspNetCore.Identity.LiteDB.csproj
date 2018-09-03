@@ -9,7 +9,7 @@
     <Company />
     <Description>A LiteDB provider for ASP.NET Core Identity framework</Description>
     <PackageTags>AspNetCore Identity LiteDB</PackageTags>
-    <Version>2.6.0</Version>
+    <Version>2.6.1</Version>
     <AssemblyVersion>2.6.1.0</AssemblyVersion>
     <FileVersion>2.6.1.0</FileVersion>
   </PropertyGroup>
