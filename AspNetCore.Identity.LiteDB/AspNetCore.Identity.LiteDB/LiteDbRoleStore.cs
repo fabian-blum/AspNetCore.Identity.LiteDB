@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -10,6 +11,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace AspNetCore.Identity.LiteDB
 {
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class LiteDbRoleStore<TRole> : IQueryableRoleStore<TRole>
       where TRole : IdentityRole, new()
    {

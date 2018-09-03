@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
 namespace AspNetCore.Identity.LiteDB.Models
 {
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class PhoneInfo
    {
       public string Number { get; internal set; }

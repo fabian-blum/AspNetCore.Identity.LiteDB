@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
@@ -13,6 +14,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace AspNetCore.Identity.LiteDB
 {
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class LiteDbUserStore<TUser> : IUserLoginStore<TUser>,
       IUserPasswordStore<TUser>,
       IUserClaimStore<TUser>,

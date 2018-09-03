@@ -1,9 +1,12 @@
-﻿namespace AspNetCore.Identity.LiteDB
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AspNetCore.Identity.LiteDB
 {
    /// <summary>
    ///    Wraps the base UserLoginInfo so that it can be serialized using litedb.
    ///    Represents a linked login for a user (i.e. a facebook/google account)
    /// </summary>
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class SerializableUserLoginInfo
    {
       public SerializableUserLoginInfo()

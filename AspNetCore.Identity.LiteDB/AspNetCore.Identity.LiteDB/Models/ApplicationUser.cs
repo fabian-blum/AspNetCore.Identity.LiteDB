@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 using LiteDB;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 namespace AspNetCore.Identity.LiteDB.Models
 {
    // Add profile data for application users by adding properties to the ApplicationUser class
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class ApplicationUser : IdentityUser
    {
       public ApplicationUser()

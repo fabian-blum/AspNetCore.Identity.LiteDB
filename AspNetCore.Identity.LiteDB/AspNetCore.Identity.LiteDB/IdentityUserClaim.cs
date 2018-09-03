@@ -1,7 +1,9 @@
-﻿using System.Security.Claims;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 
 namespace AspNetCore.Identity.LiteDB
 {
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class IdentityUserClaim
    {
       public IdentityUserClaim()

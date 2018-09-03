@@ -1,8 +1,10 @@
-﻿using LiteDB;
+﻿using System.Diagnostics.CodeAnalysis;
+using LiteDB;
 using Microsoft.AspNetCore.Identity;
 
 namespace AspNetCore.Identity.LiteDB
 {
+   [SuppressMessage("ReSharper", "UnusedMember.Global")]
    public class IdentityRole : IdentityRole<string>
    {
       public IdentityRole() => Id = ObjectId.NewObjectId().ToString();
