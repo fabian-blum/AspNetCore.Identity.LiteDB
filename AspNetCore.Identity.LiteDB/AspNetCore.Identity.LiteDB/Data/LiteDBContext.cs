@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using LiteDB;
 using Microsoft.Extensions.Configuration;
 
@@ -8,7 +9,15 @@ namespace AspNetCore.Identity.LiteDB.Data
    {
       public LiteDbContext(IConfiguration configuration)
       {
-         var connectionString = configuration.GetConnectionString("LiteDbIdentity") ?? configuration.GetSection("ConnectionStrings").GetChildren().FirstOrDefault()?.Value;
+         string connectionString;
+         try
+         {
+            connectionString = configuration.GetSection("ConnectionStrings").GetChildren().FirstOrDefault()?.Value;
+         }
+         catch (NullReferenceException)
+         {
+            throw new NullReferenceException("No connection string defined in appsettings.json");
+         }
 
          LiteDatabase = new LiteDatabase(connectionString);
       }
