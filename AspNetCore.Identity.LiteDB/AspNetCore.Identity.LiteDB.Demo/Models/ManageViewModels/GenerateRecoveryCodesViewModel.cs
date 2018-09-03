@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels
+﻿namespace AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels
 {
-    public class GenerateRecoveryCodesViewModel
-    {
-        public string[] RecoveryCodes { get; set; }
-    }
+   public class GenerateRecoveryCodesViewModel
+   {
+      public string[] RecoveryCodes { get; set; }
+   }
 }

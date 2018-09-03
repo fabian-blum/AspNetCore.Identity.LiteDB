@@ -1,33 +1,28 @@
-﻿using AspNetCore.Identity.LiteDB.Demo.Models;
+﻿using System.Diagnostics;
+using AspNetCore.Identity.LiteDB.Demo.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace AspNetCore.Identity.LiteDB.Demo.Controllers
 {
-    public class HomeController : Controller
-    {
-        public IActionResult Index()
-        {
-            return View();
-        }
+   public class HomeController : Controller
+   {
+      public IActionResult Index() => View();
 
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
+      public IActionResult About()
+      {
+         ViewData["Message"] = "Your application description page.";
 
-            return View();
-        }
+         return View();
+      }
 
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
+      public IActionResult Contact()
+      {
+         ViewData["Message"] = "Your contact page.";
 
-            return View();
-        }
+         return View();
+      }
 
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-    }
+      public IActionResult Error() => View(new ErrorViewModel
+         {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+   }
 }
