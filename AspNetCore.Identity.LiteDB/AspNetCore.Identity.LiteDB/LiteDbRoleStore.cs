@@ -12,7 +12,7 @@ using Microsoft.Win32.SafeHandles;
 namespace AspNetCore.Identity.LiteDB
 {
    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-   public class LiteDbRoleStore<TRole> : IQueryableRoleStore<TRole>
+   public class LiteDbRoleStore<TRole> : IQueryableRoleStore<TRole>, IRoleStore<TRole>
       where TRole : IdentityRole, new()
    {
       private readonly LiteCollection<CancellationToken> _cancellationTokens;
