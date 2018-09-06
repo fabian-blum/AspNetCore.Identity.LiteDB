@@ -17,6 +17,7 @@ namespace AspNetCore.Identity.LiteDB
    [SuppressMessage("ReSharper", "UnusedMember.Global")]
    [SuppressMessage("ReSharper", "RedundantExtendsListEntry")]
    public class LiteDbUserStore<TUser> : IUserStore<TUser>,
+      IUserRoleStore<TUser>,
       IUserLoginStore<TUser>,
       IUserPasswordStore<TUser>,
       IUserClaimStore<TUser>,
@@ -474,7 +475,6 @@ namespace AspNetCore.Identity.LiteDB
          var updatedCodes = new List<string>(splitCodes.Where(s => s != code));
          await ReplaceCodesAsync(user, updatedCodes, cancellationToken);
          return true;
-
       }
 
       public async Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
@@ -755,19 +755,66 @@ namespace AspNetCore.Identity.LiteDB
          Dispose(true);
          GC.SuppressFinalize(this);
       }
+
       protected virtual void Dispose(bool disposing)
       {
          if (_disposed)
             return;
 
-         if (disposing)
-         {
-            _handle.Dispose();
-         }
+         if (disposing) _handle.Dispose();
 
          _disposed = true;
       }
 
+      #endregion
+
+      #region IUserRoleStore
+
+      public Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
+         if (roleName == null) throw new ArgumentNullException(nameof(roleName));
+         user.Roles.Add(roleName);
+         return Task.CompletedTask;
+      }
+
+      public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
+         if (roleName == null) throw new ArgumentNullException(nameof(roleName));
+         user.Roles.Remove(roleName);
+         return Task.CompletedTask;
+      }
+
+      public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
+         IList<string> result = user.Roles;
+         return Task.FromResult(result);
+      }
+
+      public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (user == null) throw new ArgumentNullException(nameof(user));
+         if (roleName == null) throw new ArgumentNullException(nameof(roleName));
+         return Task.FromResult(user.Roles.Contains(roleName));
+      }
+
+      public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+      {
+         cancellationToken.ThrowIfCancellationRequested();
+         ThrowIfDisposed();
+         if (roleName == null) throw new ArgumentNullException(nameof(roleName));
+         return Task.FromResult((IList<TUser>)_users.Find(u => u.Roles.Contains(roleName)).ToList());
+      }
       #endregion
    }
 }
