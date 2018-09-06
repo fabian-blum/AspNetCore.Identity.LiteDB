@@ -15,7 +15,7 @@ namespace AspNetCore.Identity.LiteDB.Models
       public ApplicationUser()
       {
          Id = ObjectId.NewObjectId().ToString();
-         Roles = new List<string>();
+         Roles = new List<IdentityRole>();
          Logins = new List<UserLoginInfo>();
          SerializableLogins = new List<SerializableUserLoginInfo>();
          Claims = new List<IdentityUserClaim>();
@@ -48,7 +48,7 @@ namespace AspNetCore.Identity.LiteDB.Models
 
       public new virtual int AccessFailedCount { get; set; }
 
-      public List<string> Roles { get; set; }
+      public List<IdentityRole> Roles { get; set; }
 
       public List<UserToken<string>> Tokens { get; set; }
 
@@ -78,13 +78,14 @@ namespace AspNetCore.Identity.LiteDB.Models
 
       public List<IdentityUserClaim> Claims { get; set; }
 
-      public virtual void AddRole(string role)
+      public virtual void AddRole(string roleName)
       {
-         Roles.Add(role);
+         Roles.Add(new IdentityRole(roleName));
       }
 
-      public virtual void RemoveRole(string role)
+      public virtual void RemoveRole(string roleName)
       {
+         var role = Roles.Find(x => x.NormalizedName.Equals(roleName.Normalize()));
          Roles.Remove(role);
       }
 

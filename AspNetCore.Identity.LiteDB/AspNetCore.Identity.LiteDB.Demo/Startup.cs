@@ -39,7 +39,7 @@ namespace AspNetCore.Identity.LiteDB.Demo
                options.Password.RequiredLength = 6;
             })
             //.AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddUserStore<LiteDbUserStore<ApplicationUser>>()
+            .AddUserStore<LiteDbUserStore<ApplicationUser, IdentityRole>>()
             .AddRoleStore<LiteDbRoleStore<IdentityRole>>()
             .AddDefaultTokenProviders();
 

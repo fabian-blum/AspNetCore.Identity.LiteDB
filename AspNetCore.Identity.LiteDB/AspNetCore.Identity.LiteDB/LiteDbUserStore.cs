@@ -16,7 +16,7 @@ namespace AspNetCore.Identity.LiteDB
 {
    [SuppressMessage("ReSharper", "UnusedMember.Global")]
    [SuppressMessage("ReSharper", "RedundantExtendsListEntry")]
-   public class LiteDbUserStore<TUser> : IUserStore<TUser>,
+   public class LiteDbUserStore<TUser, TRole> : IUserStore<TUser>,
       IUserRoleStore<TUser>,
       IUserLoginStore<TUser>,
       IUserPasswordStore<TUser>,
@@ -28,7 +28,7 @@ namespace AspNetCore.Identity.LiteDB
       IUserEmailStore<TUser>,
       IUserLockoutStore<TUser>,
       IUserPhoneNumberStore<TUser>,
-      IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
+      IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new() where TRole : IdentityRole, new()
    {
       private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
       private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
@@ -36,10 +36,12 @@ namespace AspNetCore.Identity.LiteDB
       private readonly LiteCollection<CancellationToken> _cancellationTokens;
 
       private readonly LiteCollection<TUser> _users;
+      private readonly LiteCollection<TRole> _roles;
 
       public LiteDbUserStore(ILiteDbContext dbContext)
       {
          _users = dbContext.LiteDatabase.GetCollection<TUser>("users");
+         _roles = dbContext.LiteDatabase.GetCollection<TRole>("roles");
          _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
       }
 
@@ -545,7 +547,7 @@ namespace AspNetCore.Identity.LiteDB
                "Cannot set the confirmation status of the e-mail since the user doesn't have an e-mail.");
 
          user.Email.ConfirmationTime = confirmed
-            ? (DateTime?) DateTime.UtcNow
+            ? (DateTime?)DateTime.UtcNow
             : null;
 
          return Task.CompletedTask;
@@ -732,7 +734,7 @@ namespace AspNetCore.Identity.LiteDB
                "Cannot set the confirmation status of the phone number since the user doesn't have a phone number.");
 
          user.Phone.ConfirmationTime = confirmed
-            ? (DateTime?) DateTime.UtcNow
+            ? (DateTime?)DateTime.UtcNow
             : null;
 
          return Task.CompletedTask;
@@ -776,7 +778,8 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
          if (user == null) throw new ArgumentNullException(nameof(user));
          if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-         user.Roles.Add(roleName);
+
+         user.Roles.Add(GetRole(roleName));
          return Task.CompletedTask;
       }
 
@@ -786,7 +789,8 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
          if (user == null) throw new ArgumentNullException(nameof(user));
          if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-         user.Roles.Remove(roleName);
+
+         user.Roles.Remove(GetRole(roleName));
          return Task.CompletedTask;
       }
 
@@ -795,8 +799,13 @@ namespace AspNetCore.Identity.LiteDB
          cancellationToken.ThrowIfCancellationRequested();
          ThrowIfDisposed();
          if (user == null) throw new ArgumentNullException(nameof(user));
-         IList<string> result = user.Roles;
-         return Task.FromResult(result);
+         var roles = user.Roles;
+         IList<string> roleNames = new List<string>();
+         foreach (var role in roles)
+         {
+            roleNames.Add(role.Name);
+         }
+         return Task.FromResult(roleNames);
       }
 
       public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
@@ -805,7 +814,7 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
          if (user == null) throw new ArgumentNullException(nameof(user));
          if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-         return Task.FromResult(user.Roles.Contains(roleName));
+         return Task.FromResult(user.Roles.Contains(GetRole(roleName)));
       }
 
       public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -813,8 +822,15 @@ namespace AspNetCore.Identity.LiteDB
          cancellationToken.ThrowIfCancellationRequested();
          ThrowIfDisposed();
          if (roleName == null) throw new ArgumentNullException(nameof(roleName));
-         return Task.FromResult((IList<TUser>)_users.Find(u => u.Roles.Contains(roleName)).ToList());
+         return Task.FromResult((IList<TUser>)_users.Find(u => u.Roles.Contains(GetRole(roleName))).ToList());
       }
       #endregion
+
+      private TRole GetRole(string roleName)
+      {
+         var role = _roles.FindAll().FirstOrDefault(x => x.NormalizedName.Equals(roleName.Normalize()));
+         if (role == null) throw new ApplicationException("No role found with the specified role name.");
+         return role;
+      }
    }
 }
