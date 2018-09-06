@@ -1,6 +1,8 @@
 ﻿using AspNetCore.Identity.LiteDB.Data;
+using AspNetCore.Identity.LiteDB.Demo.Models;
 using AspNetCore.Identity.LiteDB.Demo.Services;
 using AspNetCore.Identity.LiteDB.Models;
+using LiteDB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -18,8 +20,15 @@ namespace AspNetCore.Identity.LiteDB.Demo
       // This method gets called by the runtime. Use this method to add services to the container.
       public void ConfigureServices(IServiceCollection services)
       {
-         // Add LiteDB Dependency
-         services.AddSingleton<ILiteDbContext, LiteDbContext>();
+         // Add LiteDB Dependency. Thare are three ways to set database:
+         // 1. By default it uses the first connection string on appsettings.json, ConnectionStrings section.
+         services.AddSingleton<LiteDbContext>();
+
+         // 2. Custom context implementing ILiteDbContext
+         //services.AddSingleton<AppDbContext>();
+
+         // 3. Cusom context by using constructor
+         //services.AddSingleton<ILiteDbContext, LiteDbContext>(x => new LiteDbContext(new LiteDatabase("Filename=Database.db")));
 
          services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
