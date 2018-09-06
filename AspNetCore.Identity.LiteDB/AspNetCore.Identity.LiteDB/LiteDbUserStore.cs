@@ -81,10 +81,7 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
 
          if (user == null) throw new ArgumentNullException(nameof(user));
-
-         if (userName == null) throw new ArgumentNullException(nameof(userName));
-
-         user.UserName = userName;
+         user.UserName = userName ?? throw new ArgumentNullException(nameof(userName));
 
          return Task.CompletedTask;
       }
@@ -107,10 +104,7 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
 
          if (user == null) throw new ArgumentNullException(nameof(user));
-
-         if (normalizedName == null) throw new ArgumentNullException(nameof(normalizedName));
-
-         user.NormalizedUserName = normalizedName;
+         user.NormalizedUserName = normalizedName ?? throw new ArgumentNullException(nameof(normalizedName));
 
          return Task.CompletedTask;
       }
@@ -368,10 +362,7 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
 
          if (user == null) throw new ArgumentNullException(nameof(user));
-
-         if (stamp == null) throw new ArgumentNullException(nameof(stamp));
-
-         user.SecurityStamp = stamp;
+         user.SecurityStamp = stamp ?? throw new ArgumentNullException(nameof(stamp));
          return Task.CompletedTask;
       }
 
@@ -497,10 +488,7 @@ namespace AspNetCore.Identity.LiteDB
          ThrowIfDisposed();
 
          if (user == null) throw new ArgumentNullException(nameof(user));
-
-         if (email == null) throw new ArgumentNullException(nameof(email));
-
-         user.Email = email;
+         user.Email = email ?? throw new ArgumentNullException(nameof(email));
 
          return Task.CompletedTask;
       }
