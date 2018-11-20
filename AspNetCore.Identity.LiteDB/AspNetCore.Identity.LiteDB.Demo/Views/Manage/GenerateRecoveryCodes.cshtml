@@ -1,5 +1,4 @@
-﻿@using AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels
-@model AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels.GenerateRecoveryCodesViewModel
+﻿@model GenerateRecoveryCodesViewModel
 @{
     ViewData["Title"] = "Recovery codes";
     ViewData.AddActivePage(ManageNavPages.TwoFactorAuthentication);
@@ -19,7 +18,10 @@
     <div class="col-md-12">
         @for (var row = 0; row < Model.RecoveryCodes.Count(); row += 2)
         {
-            <code>@Model.RecoveryCodes[row]</code><text>&nbsp;</text><code>@Model.RecoveryCodes[row + 1]</code><br />
+            <code>@Model.RecoveryCodes[row]</code>
+            <text>&nbsp;</text>
+            <code>@Model.RecoveryCodes[row + 1]</code>
+            <br/>
         }
     </div>
 </div>

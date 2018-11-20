@@ -5,7 +5,7 @@
 
 <h2>@ViewData["Title"]</h2>
 <h4>Associate your @ViewData["LoginProvider"] account.</h4>
-<hr />
+<hr/>
 
 <p class="text-info">
     You've successfully authenticated with <strong>@ViewData["LoginProvider"]</strong>.
@@ -19,7 +19,7 @@
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Email"></label>
-                <input asp-for="Email" class="form-control" />
+                <input asp-for="Email" class="form-control"/>
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-default">Register</button>

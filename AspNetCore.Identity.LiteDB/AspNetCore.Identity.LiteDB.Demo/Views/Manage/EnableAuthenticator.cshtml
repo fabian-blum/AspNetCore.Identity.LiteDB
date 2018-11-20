@@ -1,5 +1,4 @@
-﻿@using AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels
-@model AspNetCore.Identity.LiteDB.Demo.Models.ManageViewModels.EnableAuthenticatorViewModel
+﻿@model EnableAuthenticatorViewModel
 @{
     ViewData["Title"] = "Enable authenticator";
     ViewData.AddActivePage(ManageNavPages.TwoFactorAuthentication);
@@ -36,7 +35,7 @@
                     <form method="post">
                         <div class="form-group">
                             <label asp-for="Code" class="control-label">Verification Code</label>
-                            <input asp-for="Code" class="form-control" autocomplete="off" />
+                            <input asp-for="Code" class="form-control" autocomplete="off"/>
                             <span asp-validation-for="Code" class="text-danger"></span>
                         </div>
                         <button type="submit" class="btn btn-default">Verify</button>

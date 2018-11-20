@@ -1,19 +1,33 @@
-﻿using LiteDB;
-using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Linq;
+using LiteDB;
+using Microsoft.Extensions.Configuration;
 
 namespace AspNetCore.Identity.LiteDB.Data
 {
-    public class LiteDbContext
-    {
-        private IHostingEnvironment HostingEnvironment { get; set; }
-        public LiteDatabase LiteDatabase { get; set; }
+   public class LiteDbContext : ILiteDbContext
+   {
+      public LiteDbContext(IConfiguration configuration)
+      {
+         string connectionString;
+         try
+         {
+            connectionString = configuration.GetSection("ConnectionStrings").GetChildren().FirstOrDefault()?.Value;
+         }
+         catch (NullReferenceException)
+         {
+            throw new NullReferenceException("No connection string defined in appsettings.json");
+         }
 
-        public LiteDbContext(IHostingEnvironment environment)
-        {
-            HostingEnvironment = environment;
-            LiteDatabase = new LiteDatabase(HostingEnvironment.WebRootPath + "/App_Data/LiteDbIdentity.db");
-        }
+         LiteDatabase = new LiteDatabase(connectionString);
+      }
 
+      public LiteDbContext(LiteDatabase liteDatabase)
+      {
+         LiteDatabase = liteDatabase;
+      }
 
-    }
+      public LiteDatabase LiteDatabase { get; protected set; }
+
+   }
 }
