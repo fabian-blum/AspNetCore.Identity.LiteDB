@@ -64,8 +64,8 @@ namespace AspNetCore.Identity.LiteDB.Demo
 
          app.UseRouting();
 
-         app.UseAuthorization();
          app.UseAuthentication();
+         app.UseAuthorization();
 
          app.UseEndpoints(endpoints =>
          {
