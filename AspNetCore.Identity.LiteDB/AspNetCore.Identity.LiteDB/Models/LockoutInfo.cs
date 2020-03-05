@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
+using LiteDB;
 
 namespace AspNetCore.Identity.LiteDB.Models
 {
@@ -11,7 +11,7 @@ namespace AspNetCore.Identity.LiteDB.Models
       public bool Enabled { get; internal set; }
       public int AccessFailedCount { get; internal set; }
 
-      [JsonIgnore]
+      [BsonIgnore]
       public bool AllPropertiesAreSetToDefaults =>
          EndDate == null &&
          Enabled == false &&
