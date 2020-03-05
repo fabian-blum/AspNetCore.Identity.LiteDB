@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Identity.LiteDB", "AspNetCore.Identity.LiteDB\AspNetCore.Identity.LiteDB.csproj", "{AE14FCD2-6191-4F82-83A8-F7B771D14D31}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Identity.LiteDB.Demo", "AspNetCore.Identity.LiteDB.Demo\AspNetCore.Identity.LiteDB.Demo.csproj", "{9FCEF2DD-7B74-49AB-9BEA-C5443E6C7BEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{00288E88-8A59-452A-96F7-7BA387AD37C9}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
