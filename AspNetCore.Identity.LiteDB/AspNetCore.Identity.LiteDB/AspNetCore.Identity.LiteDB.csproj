@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageProjectUrl>https://github.com/fabian-blum/AspNetCore.Identity.LiteDB</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/fabian-blum/AspNetCore.Identity.LiteDB/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProject>https://github.com/fabian-blum/AspNetCore.Identity.LiteDB</PackageProject>
+    <PackageLicense>https://github.com/fabian-blum/AspNetCore.Identity.LiteDB/blob/master/LICENSE</PackageLicense>
     <Authors>Fabian Blum</Authors>
     <Company />
     <Description>A LiteDB provider for ASP.NET Core Identity framework</Description>
