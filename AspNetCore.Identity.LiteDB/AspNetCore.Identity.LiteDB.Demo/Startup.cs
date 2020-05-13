@@ -1,13 +1,12 @@
 ﻿using AspNetCore.Identity.LiteDB.Data;
-using AspNetCore.Identity.LiteDB.Demo.Models;
 using AspNetCore.Identity.LiteDB.Demo.Services;
 using AspNetCore.Identity.LiteDB.Models;
-using LiteDB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace AspNetCore.Identity.LiteDB.Demo
 {
@@ -22,7 +21,7 @@ namespace AspNetCore.Identity.LiteDB.Demo
       {
          // Add LiteDB Dependency. Thare are three ways to set database:
          // 1. By default it uses the first connection string on appsettings.json, ConnectionStrings section.
-         services.AddSingleton<LiteDbContext>();
+         services.AddSingleton<ILiteDbContext, LiteDbContext>();
 
          // 2. Custom context implementing ILiteDbContext
          //services.AddSingleton<AppDbContext>();
@@ -50,13 +49,11 @@ namespace AspNetCore.Identity.LiteDB.Demo
       }
 
       // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-      public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+      public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
       {
          if (env.IsDevelopment())
          {
             app.UseDeveloperExceptionPage();
-            app.UseBrowserLink();
-            app.UseDatabaseErrorPage();
          }
          else
          {
@@ -65,13 +62,14 @@ namespace AspNetCore.Identity.LiteDB.Demo
 
          app.UseStaticFiles();
 
-         app.UseAuthentication();
+         app.UseRouting();
 
-         app.UseMvc(routes =>
+         app.UseAuthentication();
+         app.UseAuthorization();
+
+         app.UseEndpoints(endpoints =>
          {
-            routes.MapRoute(
-               "default",
-               "{controller=Home}/{action=Index}/{id?}");
+            endpoints.MapDefaultControllerRoute();
          });
       }
    }

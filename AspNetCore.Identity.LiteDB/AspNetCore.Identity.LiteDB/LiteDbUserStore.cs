@@ -33,9 +33,9 @@ namespace AspNetCore.Identity.LiteDB
       private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
       private const string AuthenticatorKeyTokenName = "AuthenticatorKey";
       private const string RecoveryCodeTokenName = "RecoveryCodes";
-      private readonly LiteCollection<CancellationToken> _cancellationTokens;
 
-      private readonly LiteCollection<TUser> _users;
+      private readonly ILiteCollection<CancellationToken> _cancellationTokens;
+      private readonly ILiteCollection<TUser> _users;
 
       public LiteDbUserStore(ILiteDbContext dbContext)
       {

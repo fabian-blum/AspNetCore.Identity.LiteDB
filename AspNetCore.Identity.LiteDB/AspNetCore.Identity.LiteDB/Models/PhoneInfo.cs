@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
+using LiteDB;
 
 namespace AspNetCore.Identity.LiteDB.Models
 {
@@ -11,7 +11,7 @@ namespace AspNetCore.Identity.LiteDB.Models
       public DateTime? ConfirmationTime { get; internal set; }
       public bool IsConfirmed => ConfirmationTime != null;
 
-      [JsonIgnore]
+      [BsonIgnore]
       public bool AllPropertiesAreSetToDefaults =>
          Number == null &&
          ConfirmationTime == null;
