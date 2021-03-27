@@ -28,6 +28,7 @@ namespace AspNetCore.Identity.LiteDB
       IUserEmailStore<TUser>,
       IUserLockoutStore<TUser>,
       IUserPhoneNumberStore<TUser>,
+      IQueryableUserStore<TUser>,
       IUserAuthenticatorKeyStore<TUser> where TUser : ApplicationUser, new()
    {
       private const string AuthenticatorStoreLoginProvider = "[AspNetAuthenticatorStore]";
@@ -42,6 +43,8 @@ namespace AspNetCore.Identity.LiteDB
          _users = dbContext.LiteDatabase.GetCollection<TUser>("users");
          _cancellationTokens = dbContext.LiteDatabase.GetCollection<CancellationToken>("cancellationtokens");
       }
+
+      public IQueryable<TUser> Users => _users.FindAll().AsQueryable();
 
       public Task SaveChanges(
          CancellationToken cancellationToken = default(CancellationToken)
