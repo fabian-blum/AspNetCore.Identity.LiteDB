@@ -736,7 +736,6 @@ namespace AspNetCore.Identity.LiteDB
       }
 
       private bool _disposed;
-      private readonly SafeHandle _handle = new SafeFileHandle(IntPtr.Zero, true);
 
       public void Dispose()
       {
@@ -748,8 +747,6 @@ namespace AspNetCore.Identity.LiteDB
       {
          if (_disposed)
             return;
-
-         if (disposing) _handle.Dispose();
 
          _disposed = true;
       }
