@@ -1,5 +1,10 @@
 # AspNetCore.Identity.LiteDB
-A LiteDB provider for ASP.NET Core Identity framework.
+A LiteDB provider for ASP.NET Core Identity framework. Forked from [fabian-blum/AspNetCore.Identity.LiteDB](https://github.com/fabian-blum/AspNetCore.Identity.LiteDB) to fix a few bits.
+
+## Changes from fabian-blum/AspNetCore.Identity.LiteDB
+- Compiled against latest LiteDB to avoid signature mismatch issue (https://github.com/fabian-blum/AspNetCore.Identity.LiteDB/issues/11)
+- Added support for ``IQueryableUserStore<TUser>`` (can now use `UserManager<TUser>.Users` to list all users)
+- Compiled for .net standard 2.1
 
 # Nuget Package
 https://www.nuget.org/packages/AspNetCore.Identity.LiteDB
