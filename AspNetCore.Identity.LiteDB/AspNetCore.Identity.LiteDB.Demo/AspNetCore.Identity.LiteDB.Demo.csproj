@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\App_Data\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\AspNetCore.Identity.LiteDB\AspNetCore.Identity.LiteDB.csproj" />
   </ItemGroup>
 
