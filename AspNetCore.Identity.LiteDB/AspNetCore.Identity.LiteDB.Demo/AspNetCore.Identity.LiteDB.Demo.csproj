@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>aspnet-AspNetCore.Identity.LiteDB.Demo-A220779C-FF35-4548-B67B-1F33A07A49F3</UserSecretsId>
   </PropertyGroup>
 
