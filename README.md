@@ -1,5 +1,5 @@
 # AspNetCore.Identity.LiteDB
-A LiteDB provider for ASP.NET Core Identity framework. Forked from [fabian-blum/AspNetCore.Identity.LiteDB](https://github.com/fabian-blum/AspNetCore.Identity.LiteDB) to fix a few bits.
+
 
 ## Changes from fabian-blum/AspNetCore.Identity.LiteDB
 - Compiled against latest LiteDB to avoid signature mismatch issue (https://github.com/fabian-blum/AspNetCore.Identity.LiteDB/issues/11)
